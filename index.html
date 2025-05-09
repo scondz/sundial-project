@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sundial Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #eef2f3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .controls {
+      margin-bottom: 20px;
+    }
+    .sundial {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 5px solid #444;
+      position: relative;
+      background: radial-gradient(circle at center, #fff 80%, #ddd 100%);
+    }
+    .hour-line {
+      position: absolute;
+      width: 2px;
+      height: 140px;
+      background: #888;
+      top: 10px;
+      left: 50%;
+      transform-origin: bottom center;
+    }
+    .shadow {
+      position: absolute;
+      width: 2px;
+      height: 140px;
+      background: red;
+      top: 10px;
+      left: 50%;
+      transform-origin: bottom center;
+    }
+    label {
+      margin: 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>Enter ZIP Code: <input type="text" id="zip" placeholder="e.g. 60608" /></label>
+    <label>Dial Color: <input type="color" id="dialColor" value="#ffffff" /></label>
+    <label>Shadow Color: <input type="color" id="shadowColor" value="#ff0000" /></label>
+    <button onclick="applySettings()">Update</button>
+  </div>
+
+  <div class="sundial" id="sundial">
+    <div class="shadow" id="shadow"></div>
+  </div>
+
+  <script>
+    // Approximate ZIP-to-latitude mapping (real API could be added later)
+    const zipToLat = {
+      "60608": 41.85, // Chicago
+      "90001": 34.05, // Los Angeles
+      "10001": 40.71, // NYC
+      "73301": 30.27, // Austin
+      "94103": 37.77  // SF
+    };
+
+    // Create hour lines
+    const sundial = document.getElementById('sundial');
+    for (let i = 0; i < 12; i++) {
+      const line = document.createElement('div');
+      line.className = 'hour-line';
+      line.style.transform = `translateX(-50%) rotate(${i * 30}deg)`;
+      sundial.appendChild(line);
+    }
+
+    function solarHourAngle(lat) {
+      const now = new Date();
+      const solarNoon = 12; // very simplified
+      const hoursFromNoon = (now.getHours() + now.getMinutes() / 60) - solarNoon;
+      const angle = hoursFromNoon * 15; // 15° per hour from noon
+      return angle;
+    }
+
+    function updateShadow(lat = 41.85) {
+      const angle = solarHourAngle(lat);
+      const shadow = document.getElementById('shadow');
+      shadow.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    }
+
+    function applySettings() {
+      const zip = document.getElementById('zip').value;
+      const dialColor = document.getElementById('dialColor').value;
+      const shadowColor = document.getElementById('shadowColor').value;
+
+      const lat = zipToLat[zip] || 41.85; // Default to Chicago if not found
+      document.getElementById('sundial').style.background = dialColor;
+      document.getElementById('shadow').style.background = shadowColor;
+
+      updateShadow(lat);
+    }
+
+    setInterval(() => {
+      const zip = document.getElementById('zip').value;
+      const lat = zipToLat[zip] || 41.85;
+      updateShadow(lat);
+    }, 60000); // update every minute
+
+    applySettings(); // initial render
+  </script>
+</body>
+</html>
+
+
