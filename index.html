@@ -1,117 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sundial Generator</title>
+  <meta charset="UTF-8">
+  <title>Printable Sundial</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #eef2f3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
     }
-    .controls {
-      margin-bottom: 20px;
-    }
-    .sundial {
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      border: 5px solid #444;
+
+    .page {
+      width: 8.5in;
+      height: 11in;
+      padding: 1in;
+      box-sizing: border-box;
       position: relative;
-      background: radial-gradient(circle at center, #fff 80%, #ddd 100%);
     }
+
+    .sundial-face {
+      position: relative;
+      width: 6in;
+      height: 6in;
+      border: 2px solid #000;
+      border-radius: 50%;
+      margin: 0 auto;
+      margin-top: 1in;
+    }
+
     .hour-line {
       position: absolute;
       width: 2px;
-      height: 140px;
-      background: #888;
-      top: 10px;
+      height: 3in;
+      background: #000;
+      top: 0;
       left: 50%;
       transform-origin: bottom center;
     }
-    .shadow {
+
+    .label {
       position: absolute;
-      width: 2px;
-      height: 140px;
-      background: red;
-      top: 10px;
-      left: 50%;
-      transform-origin: bottom center;
+      text-align: center;
+      width: 40px;
+      left: calc(50% - 20px);
+      transform-origin: center center;
+      font-size: 12px;
+      font-weight: bold;
     }
-    label {
-      margin: 0 10px;
+
+    .instructions {
+      font-size: 14px;
+      margin-top: 1in;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .gnomon {
+      margin-top: 1in;
+      text-align: center;
+    }
+
+    @media print {
+      .no-print {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="controls">
-    <label>Enter ZIP Code: <input type="text" id="zip" placeholder="e.g. 60608" /></label>
-    <label>Dial Color: <input type="color" id="dialColor" value="#ffffff" /></label>
-    <label>Shadow Color: <input type="color" id="shadowColor" value="#ff0000" /></label>
-    <button onclick="applySettings()">Update</button>
-  </div>
+  <div class="page">
+    <div class="sundial-face" id="sundial">
+      <!-- Hour lines + labels -->
+    </div>
 
-  <div class="sundial" id="sundial">
-    <div class="shadow" id="shadow"></div>
+    <div class="instructions">
+      <p>📍 Place this sundial facing true North.<br>
+      🕒 The triangle gnomon should be folded upright at the center (12:00 line).<br>
+      ✂️ Cut along the circle edge and cut out the triangle gnomon below.</p>
+    </div>
+
+    <div class="gnomon">
+      <svg width="200" height="100">
+        <polygon points="100,0 130,80 70,80" stroke="black" stroke-width="2" fill="none"/>
+        <text x="100" y="95" font-size="12" text-anchor="middle">Fold this triangle upright as your gnomon</text>
+      </svg>
+    </div>
   </div>
 
   <script>
-    // Approximate ZIP-to-latitude mapping (real API could be added later)
-    const zipToLat = {
-      "60608": 41.85, // Chicago
-      "90001": 34.05, // Los Angeles
-      "10001": 40.71, // NYC
-      "73301": 30.27, // Austin
-      "94103": 37.77  // SF
-    };
+    const sundial = document.getElementById("sundial");
 
-    // Create hour lines
-    const sundial = document.getElementById('sundial');
-    for (let i = 0; i < 12; i++) {
-      const line = document.createElement('div');
-      line.className = 'hour-line';
-      line.style.transform = `translateX(-50%) rotate(${i * 30}deg)`;
+    for (let i = 6; i <= 18; i++) {
+      const angle = (i - 12) * 15;
+      const line = document.createElement("div");
+      line.className = "hour-line";
+      line.style.transform = `translateX(-50%) rotate(${angle}deg)`;
       sundial.appendChild(line);
+
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = `${i > 12 ? i - 12 : i} ${i < 12 ? "AM" : "PM"}`;
+      label.style.top = "5px";
+      label.style.transform = `translateY(-10px) rotate(${angle}deg) translateY(-3in) rotate(${-angle}deg)`;
+      sundial.appendChild(label);
     }
-
-    function solarHourAngle(lat) {
-      const now = new Date();
-      const solarNoon = 12; // very simplified
-      const hoursFromNoon = (now.getHours() + now.getMinutes() / 60) - solarNoon;
-      const angle = hoursFromNoon * 15; // 15° per hour from noon
-      return angle;
-    }
-
-    function updateShadow(lat = 41.85) {
-      const angle = solarHourAngle(lat);
-      const shadow = document.getElementById('shadow');
-      shadow.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-    }
-
-    function applySettings() {
-      const zip = document.getElementById('zip').value;
-      const dialColor = document.getElementById('dialColor').value;
-      const shadowColor = document.getElementById('shadowColor').value;
-
-      const lat = zipToLat[zip] || 41.85; // Default to Chicago if not found
-      document.getElementById('sundial').style.background = dialColor;
-      document.getElementById('shadow').style.background = shadowColor;
-
-      updateShadow(lat);
-    }
-
-    setInterval(() => {
-      const zip = document.getElementById('zip').value;
-      const lat = zipToLat[zip] || 41.85;
-      updateShadow(lat);
-    }, 60000); // update every minute
-
-    applySettings(); // initial render
   </script>
 </body>
 </html>
-
-
