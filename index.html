@@ -132,20 +132,29 @@
       gLabel.textContent = `Gnomon for ${date.toDateString()}`;
       svg.appendChild(gLabel);
 
-      // Add North label
-      const nLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      nLabel.setAttribute("x", cx);
-      nLabel.setAttribute("y", cy - b - 50);
-      nLabel.setAttribute("text-anchor", "middle");
-      nLabel.setAttribute("font-size", "16");
-      nLabel.setAttribute("font-family", "Georgia, serif");
-      nLabel.setAttribute("font-weight", "bold");
-      nLabel.textContent = "NORTH";
-      svg.appendChild(nLabel);
+      // Cardinal directions
+      const labels = [
+        { x: cx, y: cy - b - 60, text: "NORTH" },
+        { x: cx, y: cy + b + 40, text: "SOUTH" },
+        { x: cx - a - 40, y: cy, text: "WEST" },
+        { x: cx + a + 40, y: cy, text: "EAST" }
+      ];
 
-      // Add compass arrow
+      labels.forEach(({ x, y, text }) => {
+        const dir = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        dir.setAttribute("x", x);
+        dir.setAttribute("y", y);
+        dir.setAttribute("text-anchor", "middle");
+        dir.setAttribute("font-size", "16");
+        dir.setAttribute("font-family", "Georgia, serif");
+        dir.setAttribute("font-weight", "bold");
+        dir.textContent = text;
+        svg.appendChild(dir);
+      });
+
+      // Add compass arrow pointing North
       const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      arrow.setAttribute("points", `${cx},${cy - b - 70} ${cx - 6},${cy - b - 50} ${cx + 6},${cy - b - 50}`);
+      arrow.setAttribute("points", `${cx},${cy - b - 80} ${cx - 6},${cy - b - 60} ${cx + 6},${cy - b - 60}`);
       arrow.setAttribute("fill", "#FF0000");
       svg.appendChild(arrow);
     }
