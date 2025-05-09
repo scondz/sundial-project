@@ -49,7 +49,7 @@
     <button onclick="drawSundial()">Generate</button>
   </div>
 
-  <svg id="sundialSVG" width="1100" height="600"></svg>
+  <svg id="sundialSVG" width="1200" height="700" viewBox="0 0 1200 700"></svg>
 
   <script>
     const zipToLat = {
@@ -76,7 +76,7 @@
       const svg = document.getElementById("sundialSVG");
       svg.innerHTML = "";
 
-      const cx = 550, cy = 300;
+      const cx = 600, cy = 350;
       const a = 400;
       const b = a * Math.sin(lat * Math.PI / 180);
 
@@ -135,9 +135,9 @@
       // Cardinal directions
       const labels = [
         { x: cx, y: cy - b - 60, text: "NORTH" },
-        { x: cx, y: cy + b + 40, text: "SOUTH" },
-        { x: cx - a - 40, y: cy, text: "WEST" },
-        { x: cx + a + 40, y: cy, text: "EAST" }
+        { x: cx, y: cy + b + 60, text: "SOUTH" },
+        { x: cx - a - 60, y: cy, text: "WEST" },
+        { x: cx + a + 60, y: cy, text: "EAST" }
       ];
 
       labels.forEach(({ x, y, text }) => {
@@ -145,7 +145,7 @@
         dir.setAttribute("x", x);
         dir.setAttribute("y", y);
         dir.setAttribute("text-anchor", "middle");
-        dir.setAttribute("font-size", "16");
+        dir.setAttribute("font-size", "18");
         dir.setAttribute("font-family", "Georgia, serif");
         dir.setAttribute("font-weight", "bold");
         dir.textContent = text;
@@ -154,7 +154,7 @@
 
       // Add compass arrow pointing North
       const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      arrow.setAttribute("points", `${cx},${cy - b - 80} ${cx - 6},${cy - b - 60} ${cx + 6},${cy - b - 60}`);
+      arrow.setAttribute("points", `${cx},${cy - b - 85} ${cx - 6},${cy - b - 65} ${cx + 6},${cy - b - 65}`);
       arrow.setAttribute("fill", "#FF0000");
       svg.appendChild(arrow);
     }
