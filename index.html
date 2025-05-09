@@ -131,6 +131,23 @@
       gLabel.setAttribute("font-family", "Courier New, monospace");
       gLabel.textContent = `Gnomon for ${date.toDateString()}`;
       svg.appendChild(gLabel);
+
+      // Add North label
+      const nLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      nLabel.setAttribute("x", cx);
+      nLabel.setAttribute("y", cy - b - 50);
+      nLabel.setAttribute("text-anchor", "middle");
+      nLabel.setAttribute("font-size", "16");
+      nLabel.setAttribute("font-family", "Georgia, serif");
+      nLabel.setAttribute("font-weight", "bold");
+      nLabel.textContent = "NORTH";
+      svg.appendChild(nLabel);
+
+      // Add compass arrow
+      const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      arrow.setAttribute("points", `${cx},${cy - b - 70} ${cx - 6},${cy - b - 50} ${cx + 6},${cy - b - 50}`);
+      arrow.setAttribute("fill", "#FF0000");
+      svg.appendChild(arrow);
     }
 
     window.onload = drawSundial;
