@@ -2,116 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Printable Analemmatic Sundial</title>
+  <title>Interactive Analemmatic Sundial Generator</title>
   <style>
     body {
       font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
       text-align: center;
     }
-    .controls {
-      margin: 20px;
-    }
-    .print-area {
-      width: 8.5in;
-      height: 11in;
-      margin: auto;
+    svg {
       border: 1px solid #ccc;
       background: #fff;
-      padding: 1in;
-      box-sizing: border-box;
+      margin-top: 20px;
     }
-    .gnomon {
-      margin-top: 40px;
+    .controls {
+      margin-bottom: 20px;
     }
-    @media print {
-      .controls {
-        display: none;
-      }
-      body {
-        margin: 0;
-      }
+    label {
+      margin: 0 10px;
     }
   </style>
 </head>
 <body>
-
-<div class="controls">
-  <label>ZIP Code: <input type="text" id="zip" placeholder="e.g. 60608" /></label>
-  <button onclick="generateSundial()">Generate</button>
-  <button onclick="window.print()">Print</button>
-</div>
-
-<div class="print-area">
-  <svg id="sundial" width="100%" height="400px"></svg>
-  <div class="gnomon">
-    <svg width="200" height="100">
-      <polygon id="gnomon" points="100,0 130,80 70,80" stroke="#357EC7" fill="none" stroke-width="2"/>
-      <text x="100" y="95" font-size="12" text-anchor="middle">Cut and fold upright</text>
-    </svg>
+  <h1>Interactive Analemmatic Sundial Generator</h1>
+  <div class="controls">
+    <label>ZIP Code: <input type="text" id="zip" value="60608" /></label>
+    <label>Date: <input type="date" id="date" /></label>
+    <label>Dial Color: <input type="color" id="dialColor" value="#FFC0CB" /></label>
+    <label>Hour Marker Color: <input type="color" id="hourColor" value="#0000FF" /></label>
+    <button onclick="drawSundial()">Generate</button>
   </div>
-</div>
 
-<script>
-  const zipToLat = {
-    "60608": 41.85,
-    "90001": 34.05,
-    "10001": 40.71,
-    "73301": 30.27,
-    "94103": 37.77
-  };
+  <svg id="sundialSVG" width="960" height="720"></svg>
 
-  function generateSundial() {
-    const zip = document.getElementById("zip").value.trim();
-    const lat = zipToLat[zip] || 41.85;
-    const svg = document.getElementById("sundial");
-    svg.innerHTML = ""; // clear old content
+  <script>
+    const zipToLat = {
+      "60608": 41.85,
+      "90001": 34.05,
+      "10001": 40.71,
+      "73301": 30.27,
+      "94103": 37.77
+    };
 
-    const width = svg.clientWidth;
-    const height = svg.clientHeight;
-    const cx = width / 2;
-    const cy = height / 2;
-    const a = 200; // ellipse radius horizontal
-    const b = a * Math.sin(lat * Math.PI / 180); // vertical radius
-
-    // Draw ellipse
-    const ellipse = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-    ellipse.setAttribute("cx", cx);
-    ellipse.setAttribute("cy", cy);
-    ellipse.setAttribute("rx", a);
-    ellipse.setAttribute("ry", b);
-    ellipse.setAttribute("stroke", "#000");
-    ellipse.setAttribute("fill", "#FFC0CB");
-    svg.appendChild(ellipse);
-
-    // Hour markers
-    for (let hour = 6; hour <= 18; hour++) {
-      const H = (hour - 12) * 15 * Math.PI / 180;
-      const x = cx + a * Math.sin(H);
-      const y = cy - b * Math.cos(H);
-
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("cx", x);
-      circle.setAttribute("cy", y);
-      circle.setAttribute("r", 5);
-      circle.setAttribute("fill", "#0000FF");
-      svg.appendChild(circle);
-
-      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      label.setAttribute("x", x);
-      label.setAttribute("y", y - 10);
-      label.setAttribute("text-anchor", "middle");
-      label.setAttribute("font-size", "12");
-      label.textContent = hour > 12 ? (hour - 12) + " PM" : hour + " AM";
-      svg.appendChild(label);
+    function dayOfYear(date) {
+      const start = new Date(date.getFullYear(), 0, 0);
+      const diff = date - start + (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60000;
+      return Math.floor(diff / 86400000);
     }
 
-    // Optional: update gnomon if needed
-    const gnomon = document.getElementById("gnomon");
-    const base = 60;
-    const heightVal = Math.tan(lat * Math.PI / 180) * base;
-    gnomon.setAttribute("points", `100,0 ${100 + base/2},${heightVal} ${100 - base/2},${heightVal}`);
-  }
-</script>
+    function drawSundial() {
+      const zip = document.getElementById("zip").value;
+      const date = new Date(document.getElementById("date").value || Date.now());
+      const lat = zipToLat[zip] || 41.85;
+      const dialColor = document.getElementById("dialColor").value;
+      const hourColor = document.getElementById("hourColor").value;
 
+      const svg = document.getElementById("sundialSVG");
+      svg.innerHTML = "";
+
+      const cx = 480, cy = 360;
+      const a = 300;
+      const b = a * Math.sin(lat * Math.PI / 180);
+
+      // Draw ellipse
+      const ellipse = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+      ellipse.setAttribute("cx", cx);
+      ellipse.setAttribute("cy", cy);
+      ellipse.setAttribute("rx", a);
+      ellipse.setAttribute("ry", b);
+      ellipse.setAttribute("stroke", "#000");
+      ellipse.setAttribute("fill", dialColor);
+      svg.appendChild(ellipse);
+
+      // Hour markers
+      for (let hour = 6; hour <= 18; hour++) {
+        const H = (hour - 12) * 15 * Math.PI / 180;
+        const x = cx + a * Math.sin(H);
+        const y = cy - b * Math.cos(H);
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", 5);
+        circle.setAttribute("fill", hourColor);
+        svg.appendChild(circle);
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", x);
+        label.setAttribute("y", y - 10);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-size", "12");
+        label.textContent = hour > 12 ? (hour - 12) + " PM" : hour + " AM";
+        svg.appendChild(label);
+      }
+
+      // Gnomon position
+      const day = dayOfYear(date);
+      const decl = 23.44 * Math.cos((360 / 365.24) * (day - 81) * Math.PI / 180);
+      const gnomonY = cy - a * Math.tan(decl * Math.PI / 180) / Math.tan(lat * Math.PI / 180);
+
+      const gMarker = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      gMarker.setAttribute("points", `${cx},${gnomonY - 10} ${cx + 10},${gnomonY + 10} ${cx - 10},${gnomonY + 10}`);
+      gMarker.setAttribute("fill", "#357EC7");
+      svg.appendChild(gMarker);
+
+      const gLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      gLabel.setAttribute("x", cx);
+      gLabel.setAttribute("y", gnomonY + 30);
+      gLabel.setAttribute("text-anchor", "middle");
+      gLabel.setAttribute("font-size", "12");
+      gLabel.textContent = `Gnomon position for ${date.toDateString()}`;
+      svg.appendChild(gLabel);
+    }
+
+    window.onload = drawSundial;
+  </script>
 </body>
 </html>
