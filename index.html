@@ -1,109 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Printable Sundial</title>
+  <meta charset="UTF-8" />
+  <title>Printable Analemmatic Sundial</title>
   <style>
     body {
       font-family: sans-serif;
-      margin: 0;
-      padding: 0;
+      text-align: center;
     }
-
-    .page {
+    .controls {
+      margin: 20px;
+    }
+    .print-area {
       width: 8.5in;
       height: 11in;
+      margin: auto;
+      border: 1px solid #ccc;
+      background: #fff;
       padding: 1in;
       box-sizing: border-box;
-      position: relative;
     }
-
-    .sundial-face {
-      position: relative;
-      width: 6in;
-      height: 6in;
-      border: 2px solid #000;
-      border-radius: 50%;
-      margin: 0 auto;
-      margin-top: 1in;
-    }
-
-    .hour-line {
-      position: absolute;
-      width: 2px;
-      height: 3in;
-      background: #000;
-      top: 0;
-      left: 50%;
-      transform-origin: bottom center;
-    }
-
-    .label {
-      position: absolute;
-      text-align: center;
-      width: 40px;
-      left: calc(50% - 20px);
-      transform-origin: center center;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .instructions {
-      font-size: 14px;
-      margin-top: 1in;
-      text-align: center;
-      line-height: 1.4;
-    }
-
     .gnomon {
-      margin-top: 1in;
-      text-align: center;
+      margin-top: 40px;
     }
-
     @media print {
-      .no-print {
+      .controls {
         display: none;
+      }
+      body {
+        margin: 0;
       }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="sundial-face" id="sundial">
-      <!-- Hour lines + labels -->
-    </div>
 
-    <div class="instructions">
-      <p>📍 Place this sundial facing true North.<br>
-      🕒 The triangle gnomon should be folded upright at the center (12:00 line).<br>
-      ✂️ Cut along the circle edge and cut out the triangle gnomon below.</p>
-    </div>
+<div class="controls">
+  <label>ZIP Code: <input type="text" id="zip" placeholder="e.g. 60608" /></label>
+  <button onclick="generateSundial()">Generate</button>
+  <button onclick="window.print()">Print</button>
+</div>
 
-    <div class="gnomon">
-      <svg width="200" height="100">
-        <polygon points="100,0 130,80 70,80" stroke="black" stroke-width="2" fill="none"/>
-        <text x="100" y="95" font-size="12" text-anchor="middle">Fold this triangle upright as your gnomon</text>
-      </svg>
-    </div>
+<div class="print-area">
+  <svg id="sundial" width="100%" height="400px"></svg>
+  <div class="gnomon">
+    <svg width="200" height="100">
+      <polygon id="gnomon" points="100,0 130,80 70,80" stroke="#357EC7" fill="none" stroke-width="2"/>
+      <text x="100" y="95" font-size="12" text-anchor="middle">Cut and fold upright</text>
+    </svg>
   </div>
+</div>
 
-  <script>
-    const sundial = document.getElementById("sundial");
+<script>
+  const zipToLat = {
+    "60608": 41.85,
+    "90001": 34.05,
+    "10001": 40.71,
+    "73301": 30.27,
+    "94103": 37.77
+  };
 
-    for (let i = 6; i <= 18; i++) {
-      const angle = (i - 12) * 15;
-      const line = document.createElement("div");
-      line.className = "hour-line";
-      line.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-      sundial.appendChild(line);
+  function generateSundial() {
+    const zip = document.getElementById("zip").value.trim();
+    const lat = zipToLat[zip] || 41.85;
+    const svg = document.getElementById("sundial");
+    svg.innerHTML = ""; // clear old content
 
-      const label = document.createElement("div");
-      label.className = "label";
-      label.textContent = `${i > 12 ? i - 12 : i} ${i < 12 ? "AM" : "PM"}`;
-      label.style.top = "5px";
-      label.style.transform = `translateY(-10px) rotate(${angle}deg) translateY(-3in) rotate(${-angle}deg)`;
-      sundial.appendChild(label);
+    const width = svg.clientWidth;
+    const height = svg.clientHeight;
+    const cx = width / 2;
+    const cy = height / 2;
+    const a = 200; // ellipse radius horizontal
+    const b = a * Math.sin(lat * Math.PI / 180); // vertical radius
+
+    // Draw ellipse
+    const ellipse = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+    ellipse.setAttribute("cx", cx);
+    ellipse.setAttribute("cy", cy);
+    ellipse.setAttribute("rx", a);
+    ellipse.setAttribute("ry", b);
+    ellipse.setAttribute("stroke", "#000");
+    ellipse.setAttribute("fill", "#FFC0CB");
+    svg.appendChild(ellipse);
+
+    // Hour markers
+    for (let hour = 6; hour <= 18; hour++) {
+      const H = (hour - 12) * 15 * Math.PI / 180;
+      const x = cx + a * Math.sin(H);
+      const y = cy - b * Math.cos(H);
+
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", x);
+      circle.setAttribute("cy", y);
+      circle.setAttribute("r", 5);
+      circle.setAttribute("fill", "#0000FF");
+      svg.appendChild(circle);
+
+      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      label.setAttribute("x", x);
+      label.setAttribute("y", y - 10);
+      label.setAttribute("text-anchor", "middle");
+      label.setAttribute("font-size", "12");
+      label.textContent = hour > 12 ? (hour - 12) + " PM" : hour + " AM";
+      svg.appendChild(label);
     }
-  </script>
+
+    // Optional: update gnomon if needed
+    const gnomon = document.getElementById("gnomon");
+    const base = 60;
+    const heightVal = Math.tan(lat * Math.PI / 180) * base;
+    gnomon.setAttribute("points", `100,0 ${100 + base/2},${heightVal} ${100 - base/2},${heightVal}`);
+  }
+</script>
+
 </body>
 </html>
