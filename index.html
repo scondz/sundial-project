@@ -5,25 +5,41 @@
   <title>Interactive Analemmatic Sundial Generator</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f0f0f0;
+      font-family: 'Georgia', serif;
+      background: linear-gradient(to right, #fdf6e3, #f5deb3);
       padding: 20px;
       text-align: center;
     }
     svg {
-      border: 1px solid #ccc;
-      background: #fff;
+      border: 3px dashed #999;
+      background: #fff8dc;
       margin-top: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
     .controls {
       margin-bottom: 20px;
     }
     label {
       margin: 0 10px;
+      font-weight: bold;
+    }
+    h1 {
+      font-family: 'Courier New', monospace;
+      font-size: 28px;
+      color: #6b4c3b;
+    }
+    .decor {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      font-size: 80px;
+      color: rgba(100, 100, 100, 0.2);
+      transform: rotate(-15deg);
     }
   </style>
 </head>
 <body>
+  <div class="decor">☀️</div>
   <h1>Interactive Analemmatic Sundial Generator</h1>
   <div class="controls">
     <label>ZIP Code: <input type="text" id="zip" value="60608" /></label>
@@ -33,7 +49,7 @@
     <button onclick="drawSundial()">Generate</button>
   </div>
 
-  <svg id="sundialSVG" width="960" height="720"></svg>
+  <svg id="sundialSVG" width="1100" height="600"></svg>
 
   <script>
     const zipToLat = {
@@ -60,8 +76,8 @@
       const svg = document.getElementById("sundialSVG");
       svg.innerHTML = "";
 
-      const cx = 480, cy = 360;
-      const a = 300;
+      const cx = 550, cy = 300;
+      const a = 400;
       const b = a * Math.sin(lat * Math.PI / 180);
 
       // Draw ellipse
@@ -83,15 +99,16 @@
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", x);
         circle.setAttribute("cy", y);
-        circle.setAttribute("r", 5);
+        circle.setAttribute("r", 6);
         circle.setAttribute("fill", hourColor);
         svg.appendChild(circle);
 
         const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
         label.setAttribute("x", x);
-        label.setAttribute("y", y - 10);
+        label.setAttribute("y", y - 12);
         label.setAttribute("text-anchor", "middle");
-        label.setAttribute("font-size", "12");
+        label.setAttribute("font-size", "14");
+        label.setAttribute("font-family", "Georgia, serif");
         label.textContent = hour > 12 ? (hour - 12) + " PM" : hour + " AM";
         svg.appendChild(label);
       }
@@ -110,8 +127,9 @@
       gLabel.setAttribute("x", cx);
       gLabel.setAttribute("y", gnomonY + 30);
       gLabel.setAttribute("text-anchor", "middle");
-      gLabel.setAttribute("font-size", "12");
-      gLabel.textContent = `Gnomon position for ${date.toDateString()}`;
+      gLabel.setAttribute("font-size", "14");
+      gLabel.setAttribute("font-family", "Courier New, monospace");
+      gLabel.textContent = `Gnomon for ${date.toDateString()}`;
       svg.appendChild(gLabel);
     }
 
