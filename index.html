@@ -158,37 +158,6 @@
       arrow.setAttribute("points", `${cx},${cy - b - 125} ${cx - 6},${cy - b - 105} ${cx + 6},${cy - b - 105}`);
       arrow.setAttribute("fill", "#FF0000");
       svg.appendChild(arrow);
-
-      // Visual legend box
-      const legendX = 850, legendY = 710;
-      const legend = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      legend.setAttribute("x", legendX);
-      legend.setAttribute("y", legendY);
-      legend.setAttribute("width", 300);
-      legend.setAttribute("height", 140);
-      legend.setAttribute("fill", "#ffffff");
-      legend.setAttribute("stroke", "#333");
-      svg.appendChild(legend);
-
-      const legendText = [
-        { text: "Legend:", dy: 20, weight: "bold" },
-        { text: "• Pink ellipse: sundial face", dy: 40 },
-        { text: "• Blue dots: hour markers", dy: 60 },
-        { text: "• Triangle: gnomon location", dy: 80 },
-        { text: "• Red arrow: points North", dy: 100 },
-        { text: "Align the sundial with true North", dy: 120 }
-      ];
-
-      legendText.forEach(({ text, dy, weight }) => {
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        line.setAttribute("x", legendX + 10);
-        line.setAttribute("y", legendY + dy);
-        line.setAttribute("font-size", "14");
-        line.setAttribute("font-family", "Georgia, serif");
-        if (weight) line.setAttribute("font-weight", weight);
-        line.textContent = text;
-        svg.appendChild(line);
-      });
     }
 
     window.onload = drawSundial;
